@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <context:component-scan base-package="com.example"/>
+    <mvc:annotation-driven/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <security:http use-expressions="true">
+        <security:intercept-url pattern="/login/azure/callback" access="permitAll"/>
+        <security:intercept-url pattern="/login.jsp" access="permitAll"/>
+        <security:form-login login-page="/login.jsp" default-target-url="/home" authentication-failure-url="/login.jsp?error"/>
+        <security:logout logout-url="/logout" logout-success-url="/login.jsp?logout" invalidate-session="true"/>
+        <security:csrf disabled="true"/>
+    </security:http>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="preAuthProvider"/>
+    </security:authentication-manager>
+
+    <bean id="preAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <property name="preAuthenticatedUserDetailsService" ref="preAuthUserDetailsService"/>
+    </bean>
+
+    <bean id="preAuthUserDetailsService" class="com.example.security.SimplePreAuthUserDetailsService"/>
+
+    <bean id="userDetailsService" class="com.example.security.InMemoryUserDetailsService"/>
+
+</beans>
